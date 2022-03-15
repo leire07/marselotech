@@ -1,18 +1,18 @@
-<?xml version="1.0?>
-<?xml-model href=http://download.ros.org/schema/package_format3.xsd
+<?xml version="1.0"?>
+<?xml-model href=http://download.ros.org/schema/package_format3.xsd 
 schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
  <name>marselotech</name>
  <version>2.1.4</version>
  <description>
- ROS 2 packages for Asun Project
+ ROS 2 packages for marselotech project
  </description>
- <maintainer email="bgralop@epsg.upv.es">Asun Perez</maintainer>
+ <maintainer email="bgralop@epsg.upv.es">Belén Grande</maintainer>
  <license>Apache 2.0</license>
  <url type="website">http://XXXXXXX</url>
  <url type="repository">https://github.com/leire07/marselotech.git</url>
- <url type="bugtracker">https://github.com/XXXXXX</url>
- <author email="XXXXX">XXXXX</author>
+ <url type="bugtracker">https://github.com/</url>
+ <author email="XXXXX">bgralop@epsg.upv.es</author>
  <buildtool_depend>ament_cmake</buildtool_depend>
  <exec_depend>marselotech_my_world</exec_depend>
  <exec_depend>marselotech_my_nav2_system</exec_depend>
