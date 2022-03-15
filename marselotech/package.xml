@@ -9,10 +9,7 @@ schematypens="http://www.w3.org/2001/XMLSchema"?>
  </description>
  <maintainer email="bgralop@epsg.upv.es">Belén Grande</maintainer>
  <license>Apache 2.0</license>
- <url type="website">http://XXXXXXX</url>
  <url type="repository">https://github.com/leire07/marselotech.git</url>
- <url type="bugtracker">https://github.com/</url>
- <author email="XXXXX">bgralop@epsg.upv.es</author>
  <buildtool_depend>ament_cmake</buildtool_depend>
  <exec_depend>marselotech_my_world</exec_depend>
  <exec_depend>marselotech_my_nav2_system</exec_depend>
