@@ -1,0 +1,8 @@
+source;share/marselotech/hook/cmake_prefix_path.ps1
+source;share/marselotech/hook/cmake_prefix_path.dsv
+source;share/marselotech/hook/cmake_prefix_path.sh
+source;share/marselotech/local_setup.bash
+source;share/marselotech/local_setup.dsv
+source;share/marselotech/local_setup.ps1
+source;share/marselotech/local_setup.sh
+source;share/marselotech/local_setup.zsh
