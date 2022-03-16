@@ -4,7 +4,7 @@
   <name>marselotech_provide_map</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="belenchu-2001@hotmail.com">belen</maintainer>
+  <maintainer email="jjherram@epsg.upv.es">belen</maintainer>
   <license>TODO: License declaration</license>
 
   <test_depend>ament_copyright</test_depend>
