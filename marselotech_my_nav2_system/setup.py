@@ -16,6 +16,7 @@ setup(
         (os.path.join('share', package_name, 'config'), glob('config/*.yaml')),
         (os.path.join('share', package_name, 'config'), glob('config/*.rviz')),
         (os.path.join('share', package_name, 'launch'), glob('launch/*.launch.py')),
+        (os.path.join('share', package_name, 'launch'), glob('marselotech_my_nav2_system/*.py')),
         (os.path.join('share', package_name, 'config'), glob('config/*.lua')),
         (os.path.join('share', package_name, 'config'), glob('config/*.yaml')),
         (os.path.join('share', package_name, 'config'), glob('config/*.xml')) 
@@ -31,7 +32,11 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'initial_pose_pub = marselotech_my_nav2_system.initial_pose_pub:main' #añadir
+            'initial_pose_pub = marselotech_my_nav2_system.initial_pose_pub:main', #añadir
+            'action_server = marselotech_my_nav2_system.action_server:main',
+            'nav_to_pose = marselotech_my_nav2_system.nav_to_pose:main',   # incluir
+            'waypoint_follower = marselotech_my_nav2_system.waypoint_follower:main'
+
         ],
     },
 )
