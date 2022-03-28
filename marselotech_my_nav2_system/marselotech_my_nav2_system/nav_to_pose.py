@@ -2,10 +2,14 @@
 import rclpy
 from rclpy.action import ActionClient
 from rclpy.node import Node
-from custom_interface.action import Move
+from nav2_msgs.action import NavigateToPose
+from geometry_msgs.msg import Pose, PoseStamped
+from action_msgs.msg import GoalStatus
+from rclpy.qos import ReliabilityPolicy, QoSProfile
+import time
 
 
-class MyActionClient(Node):
+class NavToPose(Node):
 
     def __init__(self):
         super().__init__('my_action_client')
@@ -14,15 +18,14 @@ class MyActionClient(Node):
         #nodo
         #tipo de mensaje
         #nombre de la accion
-        self._action_client = ActionClient(self, Move, 'moving_as')
+        self._action_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
 
     #definimos la funcion de mandar goal
-    def send_goal(self, secs):
+    def send_goal(self, pose):
         # crea el mensaje tipo Goal
         # y lo rellena con el argumento dado
-        goal_msg = Move.Goal()
-        goal_msg.secs = secs
-
+        goal_msg = NavigateToPose.Goal()
+        goal_msg.pose = pose
         #espera a que el servidor este listo
         self._action_client.wait_for_server()
         # envia el goal
@@ -44,23 +47,34 @@ class MyActionClient(Node):
     
     #definimos la funcion de respuesta al resultado
     def get_result_callback(self, future):
-        result = future.result().result
-        self.get_logger().info('Result: {0}'.format(result.status))
-        rclpy.shutdown()
+        self.status = future.result().status
+        if self.status != GoalStatus.STATUS_SUCCEEDED:
+            self.get_logger().info('Navigation failed with status code: {0}'.format(self.status))
+        else:
+            self.get_logger().info('Goal success!')
+        
+        self.__reset_action()
 
     #definimos la funcion de respuesta al feedback
     def feedback_callback(self, feedback_msg):
-        feedback = feedback_msg.feedback
-        self.get_logger().info('Received feedback: {0}'.format(feedback.feedback))
+        feedback = feedback_msg
+        self.get_logger().info('Received feedback: {0}'.format(feedback))
 
     
 
 def main(args=None):
     rclpy.init(args=args)
 
-    action_client = MyActionClient()
+    action_client = NavToPose()
 
-    future = action_client.send_goal(5) # se para secs como argumento
+    goal_pose = PoseStamped()
+    goal_pose.header.frame_id = 'map'
+    goal_pose.header.stamp = action_client.get_clock().now().to_msg()
+    goal_pose.pose.position.x = 2.6
+    goal_pose.pose.position.y = 0.0
+    goal_pose.pose.orientation.w = 1.0
+
+    future = action_client.send_goal(goal_pose) # se para secs como argumento
 
     rclpy.spin(action_client)
 
