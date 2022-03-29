@@ -70,8 +70,8 @@ def main(args=None):
     goal_pose = PoseStamped()
     goal_pose.header.frame_id = 'map'
     goal_pose.header.stamp = action_client.get_clock().now().to_msg()
-    goal_pose.pose.position.x = 2.6
-    goal_pose.pose.position.y = 0.0
+    goal_pose.pose.position.x = -2.85
+    goal_pose.pose.position.y = 0.1
     goal_pose.pose.orientation.w = 1.0
 
     future = action_client.send_goal(goal_pose) # se para secs como argumento
