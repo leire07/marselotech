@@ -81,12 +81,12 @@ def generate_launch_description():
 
     declare_map_yaml_cmd = DeclareLaunchArgument(
         'map',
-        default_value=os.path.join(project_dir, 'config', 'my_map.yaml'),
+        default_value=os.path.join(project_dir, 'config', 'mapa_real.yaml'),
         description='Full path to map file to load')
 
     declare_use_sim_time_cmd = DeclareLaunchArgument(
         'use_sim_time',
-        default_value='True',
+        default_value='False',
         description='Use simulation (Gazebo) clock if true')
     
     declare_params_file_cmd = DeclareLaunchArgument(
@@ -132,17 +132,6 @@ def generate_launch_description():
         'world',
         default_value= '/home/leire/turtlebot3_ws/src/marselotech/marselotech_my_world/world/burger.model',
         description='Full path to world model file to load')
-
-    # Specify the actions
-    start_gazebo_server_cmd = ExecuteProcess(
-        condition=IfCondition(use_simulator),
-        cmd=['gzserver', '-s', 'libgazebo_ros_init.so', world],
-        cwd=[launch_dir], output='screen')
-
-    start_gazebo_client_cmd = ExecuteProcess(
-        condition=IfCondition(PythonExpression([use_simulator, ' and not ', headless])),
-        cmd=['gzclient'],
-        cwd=[launch_dir], output='screen')
 
     urdf = os.path.join(burger_dir, 'urdf', 'turtlebot3_burger.urdf')
 
@@ -195,10 +184,6 @@ def generate_launch_description():
     ld.add_action(declare_use_rviz_cmd)
     ld.add_action(declare_simulator_cmd)
     ld.add_action(declare_world_cmd)
-
-    # Add any conditioned actions
-    ld.add_action(start_gazebo_server_cmd)
-    ld.add_action(start_gazebo_client_cmd)
 
     # Add the actions to launch all of the navigation nodes
     ld.add_action(start_robot_state_publisher_cmd)
