@@ -130,7 +130,7 @@ def generate_launch_description():
 
     declare_world_cmd = DeclareLaunchArgument(
         'world',
-        default_value= '/home/leire/turtlebot3_ws/src/marselotech/marselotech_my_world/world/burger.model',
+        default_value= '$HOME/turtlebot3_ws/src/marselotech/marselotech_my_world/world/burger.model',
         description='Full path to world model file to load')
 
     urdf = os.path.join(burger_dir, 'urdf', 'turtlebot3_burger.urdf')
