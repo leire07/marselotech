@@ -24,6 +24,7 @@ class NavToPose(Node):
     def send_goal(self, pose):
         # crea el mensaje tipo Goal
         # y lo rellena con el argumento dado
+        self.get_logger().info('TEST SEND_GOAL :O')
         goal_msg = NavigateToPose.Goal()
         goal_msg.pose = pose
         #espera a que el servidor este listo
@@ -50,6 +51,13 @@ class NavToPose(Node):
         self.status = future.result().status
         if self.status != GoalStatus.STATUS_SUCCEEDED:
             self.get_logger().info('Navigation failed with status code: {0}'.format(self.status))
+            goal_pose = PoseStamped()
+            goal_pose.header.frame_id = 'map'
+            goal_pose.header.stamp = self.get_clock().now().to_msg()
+            goal_pose.pose.position.x = -1.0
+            goal_pose.pose.position.y = 2.5
+            goal_pose.pose.orientation.w = 0.0
+            self.send_goal(goal_pose)
         else:
             self.get_logger().info('Goal success!')
         
@@ -70,9 +78,9 @@ def main(args=None):
     goal_pose = PoseStamped()
     goal_pose.header.frame_id = 'map'
     goal_pose.header.stamp = action_client.get_clock().now().to_msg()
-    goal_pose.pose.position.x = -2.85
-    goal_pose.pose.position.y = 0.1
-    goal_pose.pose.orientation.w = 1.0
+    goal_pose.pose.position.x = -1.0
+    goal_pose.pose.position.y = 2.5
+    goal_pose.pose.orientation.w = 0.0
 
     future = action_client.send_goal(goal_pose) # se para secs como argumento
 
