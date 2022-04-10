@@ -61,7 +61,7 @@ class NavToPose(Node):
         else:
             self.get_logger().info('Goal success!')
         
-        self.__reset_action()
+        #self.__reset_action()
 
     #definimos la funcion de respuesta al feedback
     def feedback_callback(self, feedback_msg):

@@ -3,12 +3,23 @@ import sys
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import PoseWithCovarianceStamped
+from rclpy.qos import QoSDurabilityPolicy, QoSHistoryPolicy, QoSReliabilityPolicy, QoSLivelinessPolicy
+from rclpy.qos import QoSProfile
+from rclpy.duration import Duration
 
 class Publisher(Node):
 
+
+    qos_profile = QoSProfile(depth = 10)
+    qos_profile.reliability = QoSReliabilityPolicy.RELIABLE  # RELIABLE o BEST_EFFORT
+    qos_profile.durability = QoSDurabilityPolicy.VOLATILE  # VOLATILE o TRANSIENT_LOCAL
+    qos_profile.history = QoSHistoryPolicy.KEEP_LAST # KEEP_ALL o KEEP_LAST
+    qos_profile.liveliness = QoSLivelinessPolicy.AUTOMATIC # MANUAL BY TOPIC o AUTOMATIC
+    qos_profile.deadline = Duration(seconds = 2.0)
+
     def __init__(self):
         super().__init__('initial_pose_pub_node')
-        self.publisher_ = self.create_publisher(PoseWithCovarianceStamped, 'initialpose', 1)
+        self.publisher_ = self.create_publisher(PoseWithCovarianceStamped, 'initialpose', self.qos_profile )
         timer_period = 0.5  # seconds
         self.timer_ = self.create_timer(timer_period, self.callback)
 
