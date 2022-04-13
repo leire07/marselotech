@@ -7,6 +7,8 @@ from geometry_msgs.msg import Pose, PoseStamped
 from action_msgs.msg import GoalStatus
 from rclpy.qos import ReliabilityPolicy, QoSProfile
 import time
+import sys
+
 
 
 class NavToPose(Node):
@@ -54,9 +56,10 @@ class NavToPose(Node):
             goal_pose = PoseStamped()
             goal_pose.header.frame_id = 'map'
             goal_pose.header.stamp = self.get_clock().now().to_msg()
-            goal_pose.pose.position.x = -1.0
-            goal_pose.pose.position.y = 2.5
-            goal_pose.pose.orientation.w = 0.0
+            goal_pose.pose.position.x = float(sys.argv[1])
+            goal_pose.pose.position.y = float(sys.argv[2])
+            goal_pose.pose.orientation.w = float(sys.argv[3])
+
             self.send_goal(goal_pose)
         else:
             self.get_logger().info('Goal success!')
@@ -78,9 +81,9 @@ def main(args=None):
     goal_pose = PoseStamped()
     goal_pose.header.frame_id = 'map'
     goal_pose.header.stamp = action_client.get_clock().now().to_msg()
-    goal_pose.pose.position.x = -1.0
-    goal_pose.pose.position.y = 2.5
-    goal_pose.pose.orientation.w = 0.0
+    goal_pose.pose.position.x = float(sys.argv[1])
+    goal_pose.pose.position.y = float(sys.argv[2])
+    goal_pose.pose.orientation.w = float(sys.argv[3])   
 
     future = action_client.send_goal(goal_pose) # se para secs como argumento
 

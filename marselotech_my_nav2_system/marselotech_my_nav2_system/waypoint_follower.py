@@ -15,8 +15,8 @@ from rclpy.qos import ReliabilityPolicy, QoSProfile
 
 class WayPointFollower(Node):
 
-    def _init_(self):
-        super()._init_('my_action_client')
+    def __init__(self):
+        super().__init__('my_action_client')
         #creamos el objeto cliente de una accion
         #con parametros
         #nodo
@@ -32,6 +32,7 @@ class WayPointFollower(Node):
         goal_msg = FollowWaypoints.Goal()
         goal_msg.poses = poses
         #espera a que el servidor este listo
+        self.get_logger().info(str(goal_msg))
         self._action_client.wait_for_server()
         # envia el goal
         self._send_goal_future = self._action_client.send_goal_async(goal_msg,feedback_callback=self.feedback_callback)
@@ -151,9 +152,9 @@ def main(args=None):
   goal_poses.append(goal_pose)
  
   
-  future = navigator.send_goal(goal_poses) # se para secs como argumento
+  future = navigator.send_goal(goal_poses)
 
   rclpy.spin(navigator)
   
-if _name_ == '_main_':
-  main()
+if __name__ == '__main__':
+    main()
