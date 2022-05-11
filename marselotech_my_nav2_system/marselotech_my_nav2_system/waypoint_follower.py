@@ -22,22 +22,29 @@ class WayPointFollower(Node):
         #nodo
         #tipo de mensaje
         #nombre de la accion
-        self._action_client = ActionClient(self, FollowWaypoints, 'follow_waypoints')
+        self._action_client = ActionClient(self, FollowWaypoints, '/FollowWaypoints')
 
     #definimos la funcion de mandar goal
     def send_goal(self, poses):
-        # crea el mensaje tipo Goal
-        # y lo rellena con el argumento dado
-        self.get_logger().info('TEST SEND_GOAL :O')
+        self.get_logger().info("Waiting for 'FollowWaypoints' action server")
+        while not self._action_client.wait_for_server(timeout_sec=1.0):
+            self.get_logger().info("'FollowWaypoints' action server not available, waiting...")
+
         goal_msg = FollowWaypoints.Goal()
         goal_msg.poses = poses
-        #espera a que el servidor este listo
-        self.get_logger().info(str(goal_msg))
-        self._action_client.wait_for_server()
-        # envia el goal
-        self._send_goal_future = self._action_client.send_goal_async(goal_msg,feedback_callback=self.feedback_callback)
 
-        self._send_goal_future.add_done_callback(self.goal_response_callback)
+        self.get_logger().info('Following ' + str(len(goal_msg.poses)) + ' goals.' + '...')
+        send_goal_future = self._action_client.send_goal_async(goal_msg,
+                                                                        self.feedback_callback)
+        rclpy.spin_until_future_complete(self, send_goal_future)
+        self.goal_handle = send_goal_future.result()
+
+        if not self.goal_handle.accepted:
+            self.get_logger().info('Following ' + str(len(poses)) + ' waypoints request was rejected!')
+            return False
+
+        self.result_future = self.goal_handle.get_result_async()
+        return True
     
     #definimos la funcion de respuesta al goal
     def goal_response_callback(self, future):
@@ -59,7 +66,6 @@ class WayPointFollower(Node):
         else:
             self.get_logger().info('Goal success!')
         
-        self.__reset_action()
 
     #definimos la funcion de respuesta al feedback
     def feedback_callback(self, feedback_msg):
