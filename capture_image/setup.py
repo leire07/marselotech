@@ -19,7 +19,9 @@ setup(
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
-        'console_scripts': [ 'capture_image=capture_image.capturar:main'
+        'console_scripts': [ 
+            'capture_image=capture_image.capturar:main',
+            'capture_person=capture_image.capturar_personas:main'
         ],
     },
 )
