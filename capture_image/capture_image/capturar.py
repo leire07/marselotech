@@ -25,6 +25,7 @@ class Ros2OpenCVImageConverter(Node):
             
 
         cv2.imshow("Imagen capturada por el robot", cv_image)
+        cv2.imwrite("Imagen_capturada.jpg",cv_image)
                 
         cv2.waitKey(1)    
 
@@ -38,7 +39,8 @@ def main(args=None):
     except KeyboardInterrupt:
         img_converter_object.destroy_node()
         print("Fin del programa!")
-    
+
+
     cv2.destroyAllWindows() 
     
 

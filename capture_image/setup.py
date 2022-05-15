@@ -21,7 +21,8 @@ setup(
     entry_points={
         'console_scripts': [ 
             'capture_image=capture_image.capturar:main',
-            'capture_person=capture_image.capturar_personas:main'
+            'capture_person=capture_image.capturar_personas:main',
+            'capture_face=capture_image.capturar_caras:main'
         ],
     },
 )
