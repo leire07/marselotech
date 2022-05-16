@@ -25,7 +25,7 @@ class Ros2OpenCVImageConverter(Node):
             
 
         cv2.imshow("Imagen capturada por el robot", cv_image)
-        cv2.imwrite("Imagen_capturada.jpg",cv_image)
+        cv2.imwrite("/home/belen/Imagen_capturada.jpg",cv_image)
                 
         cv2.waitKey(1)    
 
