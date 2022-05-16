@@ -1,6 +1,7 @@
 import rclpy
 import cv2
 import numpy as np
+import os
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
 from rclpy.node import Node
@@ -24,6 +25,7 @@ class Ros2OpenCVImageConverter(Node):
             print(e)
             
 
+
         
 
         img_gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
@@ -42,14 +44,22 @@ class Ros2OpenCVImageConverter(Node):
 
 
         if(npersonas>0):
-            cv2.imshow("Imagen capturada por el robot", cv_image)
+            cv2.imshow("PRUEBA", cv_image)
             
+            print("Intruso detectado!!!")
+
             cv2.waitKey(0)
+
+            cv2.imwrite('/home/belen/imagen.jpg', cv_image)
+
             cv2.destroyAllWindows() 
             
-            cv2.imwrite('img.jpeg', cv_image)
 
 def main(args=None):
+
+    os.system('python --version')
+    os.system('pwd')
+
 
     rclpy.init(args=args)    
     img_converter_object = Ros2OpenCVImageConverter()    
