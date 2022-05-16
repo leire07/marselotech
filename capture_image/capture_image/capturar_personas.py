@@ -24,10 +24,30 @@ class Ros2OpenCVImageConverter(Node):
             print(e)
             
 
-        cv2.imshow("Imagen capturada por el robot", cv_image)
-        cv2.imwrite("Imagen_capturada.jpg",cv_image)
-                
-        cv2.waitKey(1)    
+        
+
+        img_gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
+
+        people_cascade = cv2.CascadeClassifier('clasificadores/haarcascade_fullbody.xml')
+        people_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_fullbody.xml')
+
+
+        personas = people_cascade.detectMultiScale(img_gray, 1.1, 5)
+
+        npersonas = 0
+        for (x,y,w,h) in personas:
+            cv2.rectangle(cv_image,(x,y),(x+w,y+h),(255,0,0),2)
+            roi_color = cv_image[y:y+h, x:x+w]
+            npersonas=npersonas+1
+
+
+        if(npersonas>0):
+            cv2.imshow("Imagen capturada por el robot", cv_image)
+            
+            cv2.waitKey(0)
+            cv2.destroyAllWindows() 
+            
+            cv2.imwrite('img.jpeg', cv_image)
 
 def main(args=None):
 
@@ -39,11 +59,8 @@ def main(args=None):
     except KeyboardInterrupt:
         img_converter_object.destroy_node()
         print("Fin del programa!")
-
-
-    cv2.destroyAllWindows() 
+    
     
 
 if __name__ == '__main__':
     main()
-

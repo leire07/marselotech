@@ -19,42 +19,50 @@ class Ros2OpenCVImageConverter(Node):
 
         try:
             # Seleccionamos bgr8 porque es la codificacion de OpenCV por defecto
-            cv_image = self.bridge_object.cv_imagemsg_to_cv2(data, desired_encoding="bgr8")
+            cv_image = self.bridge_object.imgmsg_to_cv2(data, desired_encoding="bgr8")
         except CvBridgeError as e:
             print(e)
             
-        cv_image_gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
 
-# Cargamos los clasificadores
+        
+
+        img_gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
+
         face_cascade = cv2.CascadeClassifier('clasificadores/haarcascade_frontalface_default.xml')
-        eye_cascade = cv2.CascadeClassifier('clasificadores/haarcascade_eye.xml')
+        face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-# Detectamos caras
-        faces = face_cascade.detectMultiScale(cv_image_gray, 1.1, 5)
 
-# Para cada cara detectada, dibujamos un rectángulo
-        for (x,y,w,h) in faces:
+        caras = face_cascade.detectMultiScale(img_gray, 1.1, 5)
+
+        ncaras = 0
+        for (x,y,w,h) in caras:
             cv2.rectangle(cv_image,(x,y),(x+w,y+h),(255,0,0),2)
             roi_color = cv_image[y:y+h, x:x+w]
+            ncaras=ncaras+1
 
-        cv2.imshow("Imagen capturada por el robot", cv_image)
+
+        if(ncaras>0):
+            cv2.imshow("Imagen capturada por el robot", cv_image)
+            
+            cv2.imshow("Imagen capturada por el robot", cv_image)
+            cv2.imwrite("Imagen_capturada.jpg",cv_image)
                 
         cv2.waitKey(1)    
 
 def main(args=None):
 
     rclpy.init(args=args)    
-    cv_image_converter_object = Ros2OpenCVImageConverter()    
+    img_converter_object = Ros2OpenCVImageConverter()    
        
     try:
-        rclpy.spin(cv_image_converter_object)
+        rclpy.spin(img_converter_object)
     except KeyboardInterrupt:
-        cv_image_converter_object.destroy_node()
+        img_converter_object.destroy_node()
         print("Fin del programa!")
-    
+
+
     cv2.destroyAllWindows() 
     
 
 if __name__ == '__main__':
     main()
-
