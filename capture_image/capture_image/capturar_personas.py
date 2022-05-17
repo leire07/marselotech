@@ -34,7 +34,7 @@ class Ros2OpenCVImageConverter(Node):
         people_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_fullbody.xml')
 
 
-        personas = people_cascade.detectMultiScale(img_gray, 1.1, 5)
+        personas = people_cascade.detectMultiScale(img_gray, 1.1, 2)
 
         npersonas = 0
         for (x,y,w,h) in personas:
@@ -48,11 +48,15 @@ class Ros2OpenCVImageConverter(Node):
             
             print("Intruso detectado!!!")
 
-            cv2.waitKey(0)
-
             cv2.imwrite('/home/belen/imagen.jpg', cv_image)
 
-            cv2.destroyAllWindows() 
+        else:
+            print(npersonas)
+        
+        cv2.waitKey(1)
+
+
+
             
 
 def main(args=None):
@@ -69,7 +73,8 @@ def main(args=None):
     except KeyboardInterrupt:
         img_converter_object.destroy_node()
         print("Fin del programa!")
-    
+    cv2.destroyAllWindows() 
+
     
 
 if __name__ == '__main__':
