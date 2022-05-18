@@ -9,6 +9,19 @@ kernel = np.ones((7,7),np.uint8)
 
 class Ros2OpenCVImageConverter(Node):   
 
+    """
+  Clase para detectar el color verde en una persona
+
+  Attributes:
+    bridge_object (CvBridge): tranforma la imagen a csv
+    image_sub (subscriber): suscriptor del topic /camera/image_raw
+  
+  Methods:
+    camera_callback(): metodo para detectar la imagen y que detecte el color verde por la persona
+
+
+  """
+
     def __init__(self):
 
         super().__init__('Ros2OpenCVImageConverter')
@@ -18,6 +31,13 @@ class Ros2OpenCVImageConverter(Node):
         
     def camera_callback(self,data):
 
+        """ Función que se activa al detectar una imagen por el topic /camre/image_raw
+        Permite mostrar por pantalla la imagen resultante con un rectángulo
+
+        Args: 
+        data(imagen)
+
+        """
         try:
             # Seleccionamos bgr8 porque es la codificacion de OpenCV por defecto
             cv_image = self.bridge_object.imgmsg_to_cv2(data, desired_encoding="bgr8")

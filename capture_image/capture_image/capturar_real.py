@@ -8,6 +8,19 @@ from rclpy.qos import ReliabilityPolicy, QoSProfile
 
 class Ros2OpenCVImageConverter(Node):   
 
+    """
+  Clase para hacer una captura de una imagen
+
+  Attributes:
+    bridge_object (CvBridge): tranforma la imagen a csv
+    image_sub (subscriber): suscriptor del topic /image
+  
+  Methods:
+    camera_callback(): metodo para detectar la imagen y hacer la captura
+
+
+  """ 
+
     def __init__(self):
 
         super().__init__('Ros2OpenCVImageConverter')
@@ -16,6 +29,14 @@ class Ros2OpenCVImageConverter(Node):
         self.image_sub = self.create_subscription(Image,'/image',self.camera_callback,QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT))
         
     def camera_callback(self,data):
+
+        """ Función que se activa al detectar una imagen por el topic /camre/image_raw
+        Permite mostrar por pantalla la imagen resultante con un rectángulo
+
+        Args: 
+        data(imagen)
+
+        """
 
         try:
             # Seleccionamos bgr8 porque es la codificacion de OpenCV por defecto
