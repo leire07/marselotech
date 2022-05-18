@@ -10,8 +10,27 @@ import time
 import sys
 
 
+"""
+Este módulo incluye el código para la navegación automática a un punto
 
+Classes:
+  NavToPose
+
+"""
 class NavToPose(Node):
+
+    """
+    Navegación automática a un punto
+
+    Attributes:
+        action_client (action_client): El cliente de la acción
+
+    
+    Methods:
+        send_goal(): Recibe el PoseStamped y manda el mensaje al topic para la navegación automática
+        goal_response_callback(): Responde ante el goal si se ha aceptado o no
+        get_result_callback(): Respuesta al resultado
+    """
 
     def __init__(self):
         super().__init__('my_action_client')
@@ -24,6 +43,16 @@ class NavToPose(Node):
 
     #definimos la funcion de mandar goal
     def send_goal(self, pose):
+        """ Función quemanda el goal al topic nav_to_pose
+
+        Args: 
+            pose (PoseStamped): Posición final del robot
+        
+        Returns:
+            bool: Si el goal se ha aceptado o no
+
+        """
+
         # crea el mensaje tipo Goal
         # y lo rellena con el argumento dado
         self.get_logger().info('TEST SEND_GOAL :O')

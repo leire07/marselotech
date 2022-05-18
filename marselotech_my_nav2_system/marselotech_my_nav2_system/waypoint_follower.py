@@ -12,20 +12,47 @@ from rclpy.qos import ReliabilityPolicy, QoSProfile
    
 
 
+"""
+Este módulo incluye el código para la navegación automática a una serie de puntos
+
+Classes:
+  WayPointFollower
+
+"""
 
 class WayPointFollower(Node):
 
+    """
+    Navegación automática por una ruta
+
+    Attributes:
+        action_client (action_client): El cliente de la acción para los waypoints
+
+    
+    Methods:
+        send_goal(): Recibe los puntos y manda el mensaje al topic para la navegación automática
+        goal_response_callback(): Responde ante el goal si se ha aceptado o no
+        get_result_callback(): Respuesta al resultado
+    """
+
     def __init__(self):
         super().__init__('my_action_client')
-        #creamos el objeto cliente de una accion
-        #con parametros
-        #nodo
-        #tipo de mensaje
-        #nombre de la accion
         self._action_client = ActionClient(self, FollowWaypoints, '/FollowWaypoints')
+
+
 
     #definimos la funcion de mandar goal
     def send_goal(self, poses):
+
+        """ Función quemanda el goal al topic /FollowWaypoints
+
+        Args: 
+            poses (PoseStamped[]): Array con todas las posiciones por las que debe pasar el robot
+        
+        Returns:
+            bool: Si el goal se ha aceptado o no
+
+        """
         self.get_logger().info("Waiting for 'FollowWaypoints' action server")
         while not self._action_client.wait_for_server(timeout_sec=1.0):
             self.get_logger().info("'FollowWaypoints' action server not available, waiting...")
@@ -46,7 +73,6 @@ class WayPointFollower(Node):
         self.result_future = self.goal_handle.get_result_async()
         return True
     
-    #definimos la funcion de respuesta al goal
     def goal_response_callback(self, future):
         goal_handle = future.result()
         if not goal_handle.accepted:
@@ -58,7 +84,6 @@ class WayPointFollower(Node):
         self._get_result_future = goal_handle.get_result_async()
         self._get_result_future.add_done_callback(self.get_result_callback)
     
-    #definimos la funcion de respuesta al resultado
     def get_result_callback(self, future):
         self.status = future.result().status
         if self.status != GoalStatus.STATUS_SUCCEEDED:
@@ -66,8 +91,6 @@ class WayPointFollower(Node):
         else:
             self.get_logger().info('Goal success!')
         
-
-    #definimos la funcion de respuesta al feedback
     def feedback_callback(self, feedback_msg):
         feedback = feedback_msg
         self.get_logger().info('Received feedback: {0}'.format(feedback))

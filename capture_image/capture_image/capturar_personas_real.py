@@ -7,7 +7,27 @@ from sensor_msgs.msg import Image
 from rclpy.node import Node
 from rclpy.qos import ReliabilityPolicy, QoSProfile
 
-class Ros2OpenCVImageConverter(Node):   
+
+"""
+Este módulo incluye el código para la detección de personas en el robot real
+
+Classes:
+  Ros2OpenCVImageConverter
+
+"""
+class Ros2OpenCVImageConverter(Node):  
+
+    """
+    Detección de personas en real
+
+    Attributes:
+        bridge_subject (CvBridge): Transforma la imagen a csv
+        image_sub (subscriber): Suscriptor del topic
+
+    
+    Methods:
+        camera_callback(): Recibe la imagen y detecta la persona
+    """ 
 
     def __init__(self):
 
@@ -17,6 +37,14 @@ class Ros2OpenCVImageConverter(Node):
         self.image_sub = self.create_subscription(Image,'/image',self.camera_callback,QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT))
         
     def camera_callback(self,data):
+
+        """ Función que se activa al detectar una imagen por el topic /image
+            Permite motrar por pantalla y guardar una imagen cada vez que se detecta una persona
+
+        Args: 
+            data (Imagen): La imagen recibida mediante el topic
+
+        """
 
         try:
             # Seleccionamos bgr8 porque es la codificacion de OpenCV por defecto
