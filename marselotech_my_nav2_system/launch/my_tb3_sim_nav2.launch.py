@@ -33,6 +33,7 @@ def generate_launch_description():
     project_dir = get_package_share_directory('marselotech_my_nav2_system')
     turtlebot3_dir = get_package_share_directory('turtlebot3_gazebo')
     burger_dir = get_package_share_directory('turtlebot3_description')
+    world_dir = get_package_share_directory('marselotech_my_world')
     
     # Create the launch configuration variables
     slam = LaunchConfiguration('slam')
@@ -130,7 +131,7 @@ def generate_launch_description():
 
     declare_world_cmd = DeclareLaunchArgument(
         'world',
-        default_value= '/home/belen/turtlebot3_ws/src/marselotech/marselotech_my_world/world/burger.model',
+        default_value= os.path.join(get_package_share_directory('marselotech_my_world'),'world/burger_pi.model'),
         description='Full path to world model file to load')
 
     # Specify the actions
@@ -144,7 +145,7 @@ def generate_launch_description():
         cmd=['gzclient'],
         cwd=[launch_dir], output='screen')
 
-    urdf = os.path.join(burger_dir, 'urdf', 'turtlebot3_burger.urdf')
+    urdf = os.path.join(burger_dir, 'urdf', 'turtlebot3_burger_pi.urdf')
 
     start_robot_state_publisher_cmd = Node(
         condition=IfCondition(use_robot_state_pub),
