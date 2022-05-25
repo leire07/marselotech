@@ -27,6 +27,7 @@ class Ros2OpenCVImageConverter(Node):
         try:
             # Seleccionamos bgr8 porque es la codificacion de OpenCV por defecto
             cv_image = self.bridge_object.imgmsg_to_cv2(data, desired_encoding="bgr8")
+            cv2.imwrite("image", cv_image)
         except CvBridgeError as e:
             print(e)
             
