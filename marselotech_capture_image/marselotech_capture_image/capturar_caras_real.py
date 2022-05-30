@@ -1,3 +1,4 @@
+from cv2 import imread
 import rclpy
 import cv2
 import numpy as np
@@ -32,6 +33,7 @@ class Ros2OpenCVImageConverter(Node):
             # Seleccionamos bgr8 porque es la codificacion de OpenCV por defecto
             cv_image = self.bridge_object.imgmsg_to_cv2(data, desired_encoding="bgr8")
             cv2.imwrite("/home/belen/image.jpg", cv_image)
+
             print("rostro detectado")
         except CvBridgeError as e:
             print(e)
@@ -57,11 +59,15 @@ class Ros2OpenCVImageConverter(Node):
         if(ncaras>0):
             cv2.imshow("Imagen capturada por el robot", cv_image) #muestra la imagen
             
-            cv2.imshow("Imagen capturada por el robot", cv_image)
             cv2.imwrite("Imagen_capturada.jpg",cv_image) #la guarda
+            imageSource=open("Imagen_capturada.jpg",'rb')
+
+            img = imread("Imagen_capturada.jpg")
+            cv2.imshow("Imagen capturada por el robot", img)
+
 
             response=self.client.search_faces_by_image(CollectionId=self.collectionId,
-                            SourceImage={'Bytes': cv_image},
+                            Image={'Bytes': imageSource.read()},
                             FaceMatchThreshold=self.threshold,
                             MaxFaces=self.maxFaces)
 
@@ -69,7 +75,7 @@ class Ros2OpenCVImageConverter(Node):
             print ('Matching faces')
             for match in faceMatches:
                 if(match['Similarity']>90):
-                    known=True
+                    self.known=True
                     if(match['Face']['ExternalImageId'] in self.friendlist):
                         print ('Se ha detectado a :'  + match['Face']['ExternalImageId'])
                         print ('Similarity: ' + "{:.2f}".format(match['Similarity']) + "%")
@@ -77,15 +83,18 @@ class Ros2OpenCVImageConverter(Node):
                     else:
                         print ('Se ha detectado a :'  + match['Face']['ExternalImageId'])
                         print ('Similarity: ' + "{:.2f}".format(match['Similarity']) + "%")
-                        enemy = 1
+                        self.enemy = 1
 
-            if(known):
-                if(enemy):
+            if(self.known):
+                if(self.enemy):
                     print("Enemigo detectado")
                 else:
                     print("Aliado detectado")
             else:
-                print("Persona desconocida detectada")
+                print("Intruso detectado")
+        
+        self.enemy=0
+        self.known=False
                 
         cv2.waitKey(1)    
 
