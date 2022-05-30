@@ -2,7 +2,7 @@ from setuptools import setup
 import os #incluir
 from glob import glob #incluir
 
-package_name = 'show_msg'
+package_name = 'marselotech_show_msg'
 
 setup(
     name=package_name,
@@ -23,7 +23,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'show_msg = show_msg.show_msg:main' #incluir
+            'show_msg = marselotech_show_msg.show_msg:main' #incluir
         ],
     },
 )
