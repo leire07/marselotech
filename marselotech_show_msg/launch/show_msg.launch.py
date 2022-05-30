@@ -4,7 +4,7 @@ from launch_ros.actions import Node
 def generate_launch_description():
     return LaunchDescription([
         Node(
-            package='show_msg',
-            executable='show_msg',
+            package='marselotech_show_msg',
+            executable='marselotech_show_msg',
             output='screen'),
     ])

@@ -11,7 +11,7 @@ def generate_launch_description():
             default_value= '1',
             description='Distancia a recorrer por el robot'),
         Node(
-            package='show_msg',
+            package='marselotech_show_msg',
             executable='show_msg_param',
             output='screen',
             parameters=[
