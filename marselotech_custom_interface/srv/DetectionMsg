@@ -1,0 +1,7 @@
+bool real #real o simulacion
+string type # Define el tipo de deteccion
+            # "caras"
+            # "personas"
+            # "color"
+---
+bool success #respuesta
