@@ -45,6 +45,25 @@ class Ros2OpenCVImageConverter(Node):
             print(e)
                     
         hsv = cv2.cvtColor(cv_image,cv2.COLOR_BGR2HSV)
+        img_gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
+
+        #Detectar persona
+
+        # Cargamos las librerías
+        people_cascade = cv2.CascadeClassifier('clasificadores/haarcascade_fullbody.xml')
+        people_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_fullbody.xml')
+
+        # Detecta las personas de la imagen en escala de grises
+        personas = people_cascade.detectMultiScale(img_gray, 1.1, 2)
+
+        # Por cada persona detectada se dibuja un rectángulo a su al rededor
+        npersonas = 0
+        for (x,y,w,h) in personas:
+            #cv2.rectangle(cv_image,(x,y),(x+w,y+h),(255,0,0),2)
+            roi_color = cv_image[y:y+h, x:x+w]
+            npersonas=npersonas+1
+
+        #Termina detectar persona
 
 
         lower_green = np.array([36, 25, 25])
@@ -89,14 +108,13 @@ class Ros2OpenCVImageConverter(Node):
 
         color = (0,0,255)
 
-        rectangulo = cv2.rectangle(cv_image, (x1,y1), (x2,y2), color, 2)
-     
-        
-
-        cv2.imshow('Verde detectado',rectangulo)
-        
-
-        cv2.waitKey(1) #aprieta una tecla 
+        if(npersonas>0):
+            rectangulo = cv2.rectangle(cv_image, (x1,y1), (x2,y2), color, 2)
+            cv2.imshow('Verde detectado',rectangulo)
+            cv2.waitKey(1) #aprieta una tecla 
+            print("Se ha detectado una persona de mi equipo")
+        else:
+            print("No hay personas verdes")
 
 def main(args=None):
 
