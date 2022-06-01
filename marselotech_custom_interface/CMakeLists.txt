@@ -41,5 +41,6 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Distvel.msg"
   "srv/MyMoveMsg.srv"
   "action/Move.action" #incluir
+  "srv/DetectionMsg.srv" #incluir
 )
 ament_package()

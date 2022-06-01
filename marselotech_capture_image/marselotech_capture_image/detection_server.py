@@ -1,7 +1,7 @@
 # Importar mensajes
 from geometry_msgs.msg import Twist
 from marselotech_custom_interface.srv import DetectionMsg
-from cv2 import imread
+from cv2 import imread, imshow, imwrite
 import rclpy
 import cv2
 import numpy as np
@@ -34,7 +34,6 @@ class Service(Node):
         self.known=False
         self.friendlist = ['Belen', 'Leire', 'Jose']
         self.client=boto3.client('rekognition', 'us-east-1')
-        self.cv_image
         self.kernel = np.ones((7,7),np.uint8)
 
 
@@ -50,8 +49,8 @@ class Service(Node):
 
         try:
             # Seleccionamos bgr8 porque es la codificacion de OpenCV por defecto
-            self.cv_image = self.bridge_object.imgmsg_to_cv2(data, desired_encoding="bgr8")
-            cv2.imwrite("image", self.cv_image)
+            cv_image = self.bridge_object.imgmsg_to_cv2(data, desired_encoding="bgr8")
+            cv2.imwrite("/home/belen/image.jpg", cv_image)
         except CvBridgeError as e:
             print(e)
 
@@ -59,19 +58,22 @@ class Service(Node):
         # recibe los parametros de esta clase
         #  recibe el mensaje request
         # devuelve el mensaje response
+        respuesta = False
 
         if request.type == "caras":
-            
-            self.capturar_caras()
-            response.success = True
-        elif request.type == "color":
+            while(not respuesta):
+                respuesta=self.capturar_caras()
+            response.success=True
 
-            self.detectar_verde()
-            response.success = True
-        elif request.type == "personas":
             
-            self.capturar_personas()
-            response.success = True
+        elif request.type == "color":
+            while(not respuesta):
+                respuesta=self.detectar_verde()
+            response.success=True
+        elif request.type == "personas":
+            while(not respuesta):
+                respuesta=self.capturar_personas()
+            response.success=True
         
         else:
             # estado de la respuesta
@@ -82,7 +84,8 @@ class Service(Node):
         return response
 
     def capturar_caras(self):
-        img_gray = cv2.cvtColor(self.cv_image, cv2.COLOR_BGR2GRAY)
+        img=imread("/home/belen/image.jpg")
+        img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         face_cascade = cv2.CascadeClassifier('clasificadores/haarcascade_frontalface_default.xml')
         face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
@@ -92,15 +95,15 @@ class Service(Node):
 
         ncaras = 0
         for (x,y,w,h) in caras:
-            cv2.rectangle(self.cv_image,(x,y),(x+w,y+h),(255,0,0),2)
-            roi_color = self.cv_image[y:y+h, x:x+w]
+            cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
+            roi_color = img[y:y+h, x:x+w]
             ncaras=ncaras+1
 
 
         if(ncaras>0):
-            cv2.imshow("Imagen capturada por el robot", self.cv_image) #muestra la imagen
+            cv2.imshow("Imagen capturada por el robot", img) #muestra la imagen
             
-            cv2.imwrite("Imagen_capturada.jpg",self.cv_image) #la guarda
+            cv2.imwrite("Imagen_capturada.jpg",img) #la guarda
             imageSource=open("Imagen_capturada.jpg",'rb')
 
             img = imread("Imagen_capturada.jpg")
@@ -133,12 +136,17 @@ class Service(Node):
                     print("Aliado detectado")
             else:
                 print("Intruso detectado")
+            return True
+        else:
+            return False
         
         self.enemy=0
         self.known=False
 
     def capturar_personas(self):
-        img_gray = cv2.cvtColor(self.cv_image, cv2.COLOR_BGR2GRAY)
+        img=imread("/home/belen/image.jpg")
+
+        img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         people_cascade = cv2.CascadeClassifier('clasificadores/haarcascade_fullbody.xml')
         people_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_fullbody.xml')
@@ -147,28 +155,32 @@ class Service(Node):
 
         npersonas = 0
         for (x,y,w,h) in personas:
-            cv2.rectangle(self.cv_image,(x,y),(x+w,y+h),(255,0,0),2)
-            roi_color = self.cv_image[y:y+h, x:x+w]
+            cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
+            roi_color = img[y:y+h, x:x+w]
             npersonas=npersonas+1
-            print("puta")
 
 
         if(npersonas>0):
-            cv2.imshow("PRUEBA", self.cv_image)
+            cv2.imshow("PRUEBA", img)
             
             print("Intruso detectado!!!")
 
-            cv2.imwrite('/home/belen/imagen.jpg', self.cv_image)
+            cv2.imwrite('/home/belen/imagen.jpg', img)
+            return True
+
 
         else:
             print(npersonas)
+            return False
         
         cv2.waitKey(1)
 
     def detectar_verde(self):
 
+        img=imread("/home/belen/image.jpg")
+
     
-        hsv = cv2.cvtColor(self.cv_image,cv2.COLOR_BGR2HSV)
+        hsv = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
 
 
         lower_green = np.array([36, 25, 25])
@@ -183,7 +195,7 @@ class Service(Node):
 
         mask = apertura
         
-        res = cv2.bitwise_and(self.cv_image, self.cv_image, mask= mask)
+        res = cv2.bitwise_and(img, img, mask= mask)
 
         x_inicial = 1000
         x_final = 0
@@ -213,7 +225,8 @@ class Service(Node):
 
         color = (0,0,255)
 
-        rectangulo = cv2.rectangle(self.cv_image, (x1,y1), (x2,y2), color, 2)
+        rectangulo = cv2.rectangle(img, (x1,y1), (x2,y2), color, 2)
+        return True
 
 def main(args=None):
     # inicializa la comunicacion ROS2
