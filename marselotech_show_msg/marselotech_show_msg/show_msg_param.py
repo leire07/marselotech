@@ -2,7 +2,7 @@ import rclpy
 # importar  ROS2 python libraries
 from rclpy.node import Node
 # importar Distvel modulo desde custom_interface
-from custom_interface.msg import Distvel
+from marselotech_custom_interface.msg import Distvel
 
 # declaro una clase derivada de Node
 class Minimal_Param(rclpy.node.Node):

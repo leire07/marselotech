@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="shotgun">
+    <link name="link">
+      <visual name="visual">
+        <pose>0 0 0.02 0 0 1.57</pose>
+        <geometry>
+          <mesh>
+            <uri>model://shotgun/meshes/ithacaM37.dae</uri>
+            <scale>0.2 0.2 0.2 </scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+  </model>
+</sdf>
