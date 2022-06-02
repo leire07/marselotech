@@ -56,8 +56,8 @@ class Service(Node):
         self.firebase = pyrebase.initialize_app(self.config)
         self.db = self.firebase.database()
 
-        self.cred = credentials.Certificate("./firebasestoragepython/key.json")
-        app = firebase_admin.initialize_app(self.cred, { 'storageBucket' : 'fir-storageproject-a0a7d.appspot.com' })
+        self.cred = credentials.Certificate("./key.json")
+        app = firebase_admin.initialize_app(self.cred, { 'storageBucket' : 'marselotech-web.appspot.com' })
 
         self.bucket = storage.bucket()
         
@@ -201,8 +201,6 @@ class Service(Node):
     def upload_image(self):
 
         blob = self.bucket.get_blob("result.png") #blob
-        storage_client = storage.Client()
-        bucket = storage_client.bucket("marselotech-web.appspot.com")
 
         url = blob.generate_signed_url(
                 version="v4",
