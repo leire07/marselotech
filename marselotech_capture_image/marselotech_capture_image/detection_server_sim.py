@@ -31,7 +31,7 @@ class Service(Node):
         self.srv = self.create_service(DetectionMsg, 'detection', self.marselotech_my_service_callback)
 
         self.bridge_object = CvBridge()
-        self.image_sub = self.create_subscription(Image,'/image',self.camera_callback,QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT))
+        self.image_sub = self.create_subscription(Image,'/camera/image_raw',self.camera_callback,QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT))
         
         self.bucket="marselotech"
         self.collectionId="caras"
