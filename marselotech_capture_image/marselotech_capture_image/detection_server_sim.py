@@ -103,6 +103,11 @@ class Service(Node):
                 respuesta=self.capturar_personas()
             response.success=True
         
+        elif request.type == "armas":
+            while(not respuesta):
+                respuesta=self.capturar_armas()
+            response.success=True
+        
         else:
             # estado de la respuesta
             # si no se ha dado ningun caso anterior
@@ -110,6 +115,33 @@ class Service(Node):
 
         # devuelve la respuesta
         return response
+
+
+
+
+    def capturar_armas(self):
+
+        photo=imread("/home/belen/image.jpg")
+        client=boto3.client('rekognition','us-east-1')
+
+        response = client.detect_labels(Image={'S3Object':{'Bucket':self.bucket,'Name':photo}})
+
+        res=False
+        #print('Detected labels for ' + photo) 
+        for label in response['Labels']:
+            #print ("Label: " + label['Name'])
+            #print ("Confidence: " + str(label['Confidence']))
+            if(label['Name'] == 'Weapon' and (label['Confidence'])>= 90.00):
+                print("Se ha detectado un arma " + photo)
+                #Subir una imagen a Storage
+                storage = self.firebase.storage()
+                storage.child("images/foto.jpg").put("result.jpg")
+                self.upload_image();
+                res=True
+        
+        if(res):
+            return True
+        return False
 
     def capturar_caras(self):
         img=imread("/home/belen/image.jpg")
