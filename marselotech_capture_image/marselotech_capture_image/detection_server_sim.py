@@ -56,7 +56,7 @@ class Service(Node):
         self.firebase = pyrebase.initialize_app(self.config)
         self.db = self.firebase.database()
 
-        self.cred = credentials.Certificate("./key.json")
+        self.cred = credentials.Certificate("launch/key.json")
         app = firebase_admin.initialize_app(self.cred, { 'storageBucket' : 'marselotech-web.appspot.com' })
 
         self.bucket = storage.bucket()
