@@ -13,7 +13,7 @@ from rclpy.qos import ReliabilityPolicy, QoSProfile
 import boto3
 import pyrebase
 import firebase_admin
-from firebase_admin import credentials, storage
+from firebase_admin import credentials, storage, firestore
 import datetime
 
 
@@ -33,7 +33,7 @@ class Service(Node):
         self.bridge_object = CvBridge()
         self.image_sub = self.create_subscription(Image,'/image',self.camera_callback,QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT))
         
-        self.bucket="marselotech"
+        self.bucketname="marselotech"
         self.collectionId="caras"
         self.threshold = 1
         self.maxFaces=3
@@ -51,13 +51,30 @@ class Service(Node):
             "storageBucket": "marselotech-web.appspot.com"
         }
 
+        jsonObject={
+            "type": "service_account",
+            "project_id": "marselotech-web",
+            "private_key_id": "7d2c358ef0507a9e3d9ddde9905d14e6495d0dae",
+            "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC0et+ofrI0H+KG\nNUP+sPn5svHMAqx9yusfNleqyFDeWN2dXv7L1rrMRx7BaJQE/2PXD4czi/FPVNoT\nWoLnc8SnuzzPt7d48KhdQ0qOUzhwfs+dGbKcMQ9jeMmUqiwFnzbTC1yrTCxzHwGv\nwQ9ypHOsD60AUNiKeQf4Dxe9o2xbUVC+KmBr6k7gMa+phIzYKfcYaNQ6IKBN1Xg2\nRN6BztRMWduCmjqtMaYjsKpL/luOtRka5pImvSORWH8ERJG97Q/eI9ujwSalCIyJ\n2KzsjOo0IxGdZol5ayrwAK/uoRoDYK86zx67c/HzrYmFdEEOvI9WNsIpno0a1Hot\nWjO2Ti1TAgMBAAECggEAE7229ia5llMAg56S6+puxV3J7f9C39WQx0654x/bHJ8K\nyppn82Lu9sY2uoAWZL+Mq6rypnRBtmQ5IFHPrMJwecpUugHF61AjkmP4ZT38F+3/\nBpeXflctcDt3jS/Z9dl29Tmybrg7ynHTTOaoqmkLj//88+Jj9S2M7hi0h5U3FnvM\nnbtv91XzLsEVSaHI3E9rJBFetUQViHv/wB4DoIT7pfW9v/HyYuJAK5DM9DYYT3+1\n2El5jnov8e3v4k33InGUayA6xutSsuNsxAhuU/7UL+FcJZvPWeG8WF7nCNOfv3xw\nEsyiNEjWem+KHwdMHrwdcVjqbtB50EmONXrlbqiz0QKBgQDziT4pnvb6HtTyit5M\n4/5kTK1xTaAIvynTwAmbv/MEPyxjzGSNztuFN1hhx0/t8sF33cLVVZadEvBhUaKn\nCi/pRXqg8BsxZ8e6W8SC8dk1rszZYET9rkkl20TGKh+8UIbqNPQP0lz1LFuZ5R+u\n62Mpu0C6s9FLPsiUfRkxnTh40QKBgQC9t3ut2pz/RZfyiXFliX02Wzi5l20ndJ4Z\nae/rAx42eZWvXKfDOuoUpRnSmPbC+ZHEakACUFjhu7XQTTv2OO+rhrFW33+wRbHT\nUwP90wVDrpUNuZslazU5hRw2oQmxcFlCM7zq2DJVUPPjEjfab3p1rU3aL+9W8B8F\nYaYFqs1M4wKBgEvt4Uy2vEgVbs1EELUmbH03DuiBjEDN4Suc9yHxQcJ0M9HVuxAf\ni3/IVqz9qGUGx90obgN3kOLeMcYV3sF3wqJXQDmHQuMveS0YSXeOEevT2Rh5FGmH\nelTsPVAPeB+Nd9LzuZhpPQRP1StxLWSrDRrIwBC12a49H+pz6nP2kdHRAoGAG0Er\nxGsemNGfpZk3MDYTRebO/GKTrNJlEBOXAvUctwi6h0nRVAu3qyWY0xdkg9gkp8n3\nzh1K14sG8JjX32SIkeS0v102U9V/WXOYpDNXk0SWZzVd439GUzAbQIHcCaCxQgB6\nyGYsvPL3RozMd1YCirtN7uVqBdxTKIvBtRi3i68CgYBeER5yGkQDwUjM1CJhpcFk\npACO+KId43apzfzmJzbLjFKIx0aPy/Gye3B9xA8HGMgMHkub8YWGgJio17ojvXm4\nvAsLZ7Lz73rkIoa2cnqZg/VOoIb77WEJ2rAsLkkzHfMajlIQT06Lc/1DUMN60IKy\nn7hd0F5yJOW6JQnvcKc4Wg==\n-----END PRIVATE KEY-----\n",
+            "client_email": "firebase-adminsdk-vokzj@marselotech-web.iam.gserviceaccount.com",
+            "client_id": "117057869359564983002",
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+            "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-vokzj%40marselotech-web.iam.gserviceaccount.com"
+        }
+
         #Inicializa la base de datos
 
         self.firebase = pyrebase.initialize_app(self.config)
-        self.db = self.firebase.database()
+        self.db1 = self.firebase.database()
 
-        self.cred = credentials.Certificate("./key.json")
-        app = firebase_admin.initialize_app(self.cred, { 'storageBucket' : 'marselotech-web.appspot.com' })
+        
+
+        self.cred = credentials.Certificate(jsonObject)
+        firebase_admin.initialize_app(self.cred, { 'storageBucket' : 'marselotech-web.appspot.com' })
+        self.db = firestore.client()
+
 
         self.bucket = storage.bucket()
         
@@ -103,6 +120,11 @@ class Service(Node):
                 respuesta=self.capturar_personas()
             response.success=True
         
+        elif request.type == "armas":
+            while(not respuesta):
+                respuesta=self.capturar_armas()
+            response.success=True
+        
         else:
             # estado de la respuesta
             # si no se ha dado ningun caso anterior
@@ -110,6 +132,33 @@ class Service(Node):
 
         # devuelve la respuesta
         return response
+
+
+
+
+    def capturar_armas(self):
+
+        photo=imread("/home/belen/image.jpg")
+        client=boto3.client('rekognition','us-east-1')
+
+        response = client.detect_labels(Image={'S3Object':{'Bucket':self.bucketname,'Name':photo}})
+
+        res=False
+        #print('Detected labels for ' + photo) 
+        for label in response['Labels']:
+            #print ("Label: " + label['Name'])
+            #print ("Confidence: " + str(label['Confidence']))
+            if(label['Name'] == 'Weapon' and (label['Confidence'])>= 90.00):
+                print("Se ha detectado un arma " + photo)
+                #Subir una imagen a Storage
+                storage = self.firebase.storage()
+                storage.child("images/foto.jpg").put("result.jpg")
+                self.upload_image();
+                res=True
+        
+        if(res):
+            return True
+        return False
 
     def capturar_caras(self):
         img=imread("/home/belen/image.jpg")
@@ -200,16 +249,20 @@ class Service(Node):
 
     def upload_image(self):
 
-        blob = self.bucket.get_blob("result.png") #blob
+        blob = self.bucket.blob('result.jpg') #blob
+        blob.make_public()
+        blob.upload_from_filename('result.jpg')
 
-        url = blob.generate_signed_url(
+        url =  blob.generate_signed_url(
                 version="v4",
                 # This URL is valid for 15 minutes
                 expiration=datetime.timedelta(minutes=15),
                 # Allow GET requests using this URL.
                 method="GET",
         )
-        now = datetime.now()
+
+        url=blob.public_url
+        now = datetime.datetime.now()
 
         current_time = now.strftime("%H:%M:%S")
         data = {
@@ -218,9 +271,8 @@ class Service(Node):
             u'time': current_time
         }
 
-        # Add a new doc in collection 'cities' with ID 'LA'
 
-        self.db.collection(u'cities').document(current_time).set(data)
+        self.db.collection(u'images').add(data)
 
     def capturar_personas(self):
         img=imread("/home/belen/image.jpg")
@@ -304,8 +356,6 @@ class Service(Node):
         	
         apertura = cv2.morphologyEx(mask, cv2.MORPH_OPEN, self.kernel)
 
-        cv2.imshow('funcionapordios', apertura)
-
         mask = apertura
         
         res = cv2.bitwise_and(img, img, mask= mask)
@@ -338,7 +388,7 @@ class Service(Node):
 
         color = (0,0,255)
 
-        if(npersonas>0):
+        if(True):
             rectangulo = cv2.rectangle(img, (x1,y1), (x2,y2), color, 2)
             cv2.imshow('Verde detectado',rectangulo)
 
