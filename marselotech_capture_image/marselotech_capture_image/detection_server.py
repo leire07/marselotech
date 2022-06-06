@@ -2,7 +2,7 @@
 from distutils.command.upload import upload
 from geometry_msgs.msg import Twist
 from marselotech_custom_interface.srv import DetectionMsg
-from cv2 import FarnebackOpticalFlow, imread, imshow, imwrite
+from cv2 import imread, imshow, imwrite
 import rclpy
 import cv2
 import numpy as np
@@ -42,6 +42,8 @@ class Service(Node):
         self.friendlist = ['Belen', 'Leire', 'Jose']
         self.client=boto3.client('rekognition', 'us-east-1')
         self.kernel = np.ones((7,7),np.uint8)
+        self.funciona=False
+
 
         #Credenciales para la comunicación FIREBASE
         self.config = {
@@ -89,18 +91,16 @@ class Service(Node):
             data : Imagen que recibe del robot en forma de matriz (píxeles)
 
         """
-        funciona=False
 
-        while(not funciona):
+
+        while(not self.funciona):
             try:
                 # Seleccionamos bgr8 porque es la codificacion de OpenCV por defecto
                 cv_image = self.bridge_object.imgmsg_to_cv2(data, desired_encoding="bgr8")
                 cv2.imwrite("/home/belen/image.jpg", cv_image)
-                funciona=True
+                self.funciona=True
             except CvBridgeError as e:
                 print(e)
-
-        
 
     def marselotech_my_service_callback(self, request, response):
         # recibe los parametros de esta clase
@@ -110,30 +110,45 @@ class Service(Node):
 
         print(request.type)
 
-        if request.type == "caras":
-            while(not respuesta):
-                respuesta=self.capturar_caras()
-            response.success=True
 
+        try:
+            # Seleccionamos bgr8 porque es la codificacion de OpenCV por defecto
+            img=imread("/home/belen/image.jpg")
+            hsv = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)   
+            self.funciona=True
+        except CvBridgeError as e:
+                print(e)
+
+        
+        if(self.funciona):
+            if request.type == "caras":
+                while(not respuesta):
+                    respuesta=self.capturar_caras()
+                response.success=True
+               
+            elif request.type == "color":
+                while(not respuesta):
+                    respuesta=self.detectar_verde()
+                response.success=True
+            elif request.type == "personas":
+                while(not respuesta):
+                    respuesta=self.capturar_personas()
+                response.success=True
             
-        elif request.type == "color":
-            while(not respuesta):
-                respuesta=self.detectar_verde()
-            response.success=True
-        elif request.type == "personas":
-            while(not respuesta):
-                respuesta=self.capturar_personas()
-            response.success=True
-        
-        elif request.type == "armas":
-            while(not respuesta):
-                respuesta=self.capturar_armas()
-            response.success=True
-        
+            elif request.type == "armas":
+                while(not respuesta):
+                    respuesta=self.capturar_armas()
+                response.success=True
+            
+            else:
+                # estado de la respuesta
+                # si no se ha dado ningun caso anterior
+                response.success = False
         else:
             # estado de la respuesta
             # si no se ha dado ningun caso anterior
             response.success = False
+
 
         # devuelve la respuesta
         return response
