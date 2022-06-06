@@ -93,14 +93,13 @@ class Service(Node):
         """
 
 
-        while(not self.funciona):
-            try:
-                # Seleccionamos bgr8 porque es la codificacion de OpenCV por defecto
-                cv_image = self.bridge_object.imgmsg_to_cv2(data, desired_encoding="bgr8")
-                cv2.imwrite("/home/belen/image.jpg", cv_image)
-                self.funciona=True
-            except CvBridgeError as e:
-                print(e)
+        try:
+            # Seleccionamos bgr8 porque es la codificacion de OpenCV por defecto
+            cv_image = self.bridge_object.imgmsg_to_cv2(data, desired_encoding="bgr8")
+            cv2.imwrite("/home/belen/image.jpg", cv_image)
+            self.funciona=True
+        except CvBridgeError as e:
+            print(e)
 
     def marselotech_my_service_callback(self, request, response):
         # recibe los parametros de esta clase
@@ -159,28 +158,25 @@ class Service(Node):
     def capturar_armas(self):
 
         photo=imread("/home/belen/image.jpg")
+        imagesrc=open("/home/belen/image.jpg", 'rb')
         client=boto3.client('rekognition','us-east-1')
 
-        response = client.detect_labels(Image={'S3Object':{'Bucket':self.bucketname,'Name':photo}})
+        response = client.detect_labels(Image={'Bytes':imagesrc.read()})
 
         res=False
         #print('Detected labels for ' + photo) 
         for label in response['Labels']:
-            #print ("Label: " + label['Name'])
-            #print ("Confidence: " + str(label['Confidence']))
             if(label['Name'] == 'Weapon' and (label['Confidence'])>= 90.00):
                 cv2.imwrite("armas.jpg",photo)
-                print("Se ha detectado un arma " + photo)
                 #Subir una imagen a Storage
                 storage = self.firebase.storage()
-                storage.child("images").put("armas.jpg")
-                self.upload_image("armas.jpg");
+                storage.child("arma").put("armas.jpg")
+                self.upload_image("armas.jpg", "arma");
                 res=True
         
         if(res):
             return True
         return False
-
 
     def capturar_caras(self):
         img=imread("/home/belen/image.jpg")
@@ -235,21 +231,19 @@ class Service(Node):
 
             if(self.known):
                 if(self.enemy):
-                    cv2.putText(img,"Enemigo detectado: "+texto,0,fuente,1,color,2)
                     print("Enemigo detectado")
 
                     cv2.imwrite("caras.jpg",img) #la guarda
                     #Subir una imagen a Storage
                     storage = self.firebase.storage()
-                    storage.child("images").put("caras.jpg")
+                    storage.child("caras").put("caras.jpg")
                 else:
-                    cv2.putText(img,"Aliado detectado: "+texto,0,fuente,1,color,2)
                     print("Aliado detectado")
 
                     cv2.imwrite("caras.jpg",img) #la guarda
                     #Subir una imagen a Storage
                     storage = self.firebase.storage()
-                    storage.child("images").put("caras.jpg")
+                    storage.child("caras").put("caras.jpg")
             else:
                 cv2.putText(img,"Intruso detectado",0,fuente,1,color,2)
                 print("Intruso detectado")
@@ -257,9 +251,9 @@ class Service(Node):
                 cv2.imwrite("caras.jpg",img) #la guarda
                 #Subir una imagen a Storage
                 storage = self.firebase.storage()
-                storage.child("images").put("caras.jpg")     
+                storage.child("caras").put("caras.jpg")     
             
-            self.upload_image("caras.jpg")
+            self.upload_image("caras.jpg", "caras")
             self.enemy=0
             self.known=False
 
@@ -269,10 +263,11 @@ class Service(Node):
             self.known=False
             return False
 
-    def upload_image(self,name):
+    def upload_image(self,name, type):
 
-        storage = self.firebase.storage()
-        url =  storage.child("images").get_url(name)
+        blob = self.bucket.blob(name) #blob
+        storage=self.firebase.storage()
+        url =  storage.child(type).get_url(name)
 
         now = datetime.datetime.now()
 
@@ -280,7 +275,8 @@ class Service(Node):
         data = {
             u'img': url,
             u'robotid': u'1',
-            u'time': current_time
+            u'time': current_time,
+            u'type': type
         }
 
 
@@ -312,9 +308,9 @@ class Service(Node):
             cv2.imwrite("persona.jpg",img) #la guarda
             #Subir una imagen a Storage
             storage = self.firebase.storage()
-            storage.child("images").put("persona.jpg")     
+            storage.child("persona").put("persona.jpg")     
             
-            self.upload_image("persona.jpg")
+            self.upload_image("persona.jpg", "persona")
 
             return True
 
@@ -344,7 +340,6 @@ class Service(Node):
         #Detectar persona
 
         # Cargamos las librerías
-        people_cascade = cv2.CascadeClassifier('clasificadores/haarcascade_fullbody.xml')
         people_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_fullbody.xml')
 
         # Detecta las personas de la imagen en escala de grises
@@ -353,7 +348,7 @@ class Service(Node):
         # Por cada persona detectada se dibuja un rectángulo a su al rededor
         npersonas = 0
         for (x,y,w,h) in personas:
-            #cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
+            #cv2.rectangle(cv_image,(x,y),(x+w,y+h),(255,0,0),2)
             roi_color = img[y:y+h, x:x+w]
             npersonas=npersonas+1
 
@@ -394,27 +389,31 @@ class Service(Node):
                                 y_inicial = j
 
         x1 = y_inicial
+        print("La x1 es:" + str(x1))
         y1 = x_final
+        print("La y1 es:" + str(y1))
         x2 = y_final
+        print("La x2 es:" + str(x2))
         y2 = x_inicial
+        print("La y2 es:" + str(y2))
 
         color = (0,0,255)
 
-        if(True):
-            rectangulo = cv2.rectangle(img, (x1,y1), (x2,y2), color, 2)
-            cv2.imshow('Verde detectado',rectangulo)
+        if(x1 != x2 or y1 != y2):
+            if(True):
+                rectangulo = cv2.rectangle(img, (x1,y1), (x2,y2), color, 2)
 
-            cv2.imwrite("color.jpg",img) #la guarda
-            #Subir una imagen a Storage
-            storage = self.firebase.storage()
-            storage.child("images").put("color.jpg")     
-            
-            self.upload_image("color.jpg")
-            print("Se ha detectado una persona de mi equipo")
-            return True
-        else:
-            print("No hay personas verdes")
-            return False
+                cv2.imwrite("color.jpg",img) #la guarda
+                #Subir una imagen a Storage
+                storage = self.firebase.storage()
+                storage.child("color").put("color.jpg")     
+                
+                self.upload_image("color.jpg", "color")
+                print("Se ha detectado una persona de mi equipo")
+                return True
+            else:
+                print("No hay personas verdes")
+                return False
 
 def main(args=None):
     # inicializa la comunicacion ROS2

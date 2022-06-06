@@ -15,7 +15,9 @@ setup(
         (os.path.join('share', package_name, 'launch'), glob('launch/*.launch.py')),
         (os.path.join('share', package_name, 'launch'), glob('marselotech_capture_image/*.py')),
         (os.path.join('share', package_name, 'launch'), glob('marselotech_capture_image/*.json')),
-        (os.path.join('lib', package_name , 'launch'), glob('marselotech_capture_image/*.json'))
+        (os.path.join('lib', package_name , 'launch'), glob('marselotech_capture_image/*.json')),
+        (os.path.join('share', package_name, 'launch'), glob('marselotech_capture_image/clasificadores/*.xml')),
+        (os.path.join('lib', package_name), glob('marselotech_capture_image/clasificadores/*.xml'))
 
 
 
@@ -38,7 +40,9 @@ setup(
             'capture_face_real=marselotech_capture_image.capturar_caras_real:main',
             'capture_image_real=marselotech_capture_image.capturar_real:main',
             'detection_server = marselotech_capture_image.detection_server:main',
-            'detection_server_sim = marselotech_capture_image.detection_server_sim:main'
+            'detection_server_sim = marselotech_capture_image.detection_server_sim:main',
+            'save_image_service_sim = marselotech_capture_image.save_image_server_sim:main',
+            'save_image_service = marselotech_capture_image.save_image_server:main'
 
         ],
     },
