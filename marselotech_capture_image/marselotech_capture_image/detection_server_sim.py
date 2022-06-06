@@ -181,6 +181,7 @@ class Service(Node):
             return True
         return False
 
+
     def capturar_caras(self):
         img=imread("/home/belen/image.jpg")
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -270,14 +271,8 @@ class Service(Node):
 
     def upload_image(self,name):
 
-        blob = self.bucket.blob(name) #blob
-        url =  blob.generate_signed_url(
-                version="v4",
-                # This URL is valid for 15 minutes
-                expiration=datetime.timedelta(minutes=15),
-                # Allow GET requests using this URL.
-                method="GET",
-        )
+        storage = self.firebase.storage()
+        url =  storage.child("images").get_url(name)
 
         now = datetime.datetime.now()
 
