@@ -4,6 +4,7 @@ from rclpy.action import ActionClient
 from rclpy.node import Node
 from nav2_msgs.action import NavigateToPose
 from geometry_msgs.msg import Pose, PoseStamped
+from marselotech_custom_interface.srv import NavToPoseMsg
 from action_msgs.msg import GoalStatus
 from rclpy.qos import ReliabilityPolicy, QoSProfile
 import time
@@ -39,7 +40,23 @@ class NavToPose(Node):
         #nodo
         #tipo de mensaje
         #nombre de la accion
-        self._action_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
+        self.srv = self.create_service(NavToPoseMsg, 'navigate', self.marselotech_my_nav_service_callback)
+        self.goal_pose = PoseStamped()
+        self.goal_pose.header.frame_id = 'map'
+        self.goal_pose.header.stamp = self.get_clock().now().to_msg()
+        self.action_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
+
+
+    def marselotech_my_nav_service_callback(self, request, response):
+
+        
+        self.goal_pose.pose.position.x = float(request.x)
+        self.goal_pose.pose.position.y = float(request.y)
+        self.goal_pose.pose.orientation.w = 0.0  
+
+        future = self.send_goal(self.goal_pose) # se para secs como argumento
+        response=True
+        return response
 
     #definimos la funcion de mandar goal
     def send_goal(self, pose):
@@ -59,9 +76,9 @@ class NavToPose(Node):
         goal_msg = NavigateToPose.Goal()
         goal_msg.pose = pose
         #espera a que el servidor este listo
-        self._action_client.wait_for_server()
+        self.action_client.wait_for_server()
         # envia el goal
-        self._send_goal_future = self._action_client.send_goal_async(goal_msg,feedback_callback=self.feedback_callback)
+        self._send_goal_future = self.action_client.send_goal_async(goal_msg,feedback_callback=self.feedback_callback)
 
         self._send_goal_future.add_done_callback(self.goal_response_callback)
     
@@ -82,14 +99,8 @@ class NavToPose(Node):
         self.status = future.result().status
         if self.status != GoalStatus.STATUS_SUCCEEDED:
             self.get_logger().info('Navigation failed with status code: {0}'.format(self.status))
-            goal_pose = PoseStamped()
-            goal_pose.header.frame_id = 'map'
-            goal_pose.header.stamp = self.get_clock().now().to_msg()
-            goal_pose.pose.position.x = float(sys.argv[1])
-            goal_pose.pose.position.y = float(sys.argv[2])
-            goal_pose.pose.orientation.w = float(sys.argv[3])
 
-            self.send_goal(goal_pose)
+            self.send_goal(self.goal_pose)
         else:
             self.get_logger().info('Goal success!')
         
@@ -107,14 +118,18 @@ def main(args=None):
 
     action_client = NavToPose()
 
-    goal_pose = PoseStamped()
-    goal_pose.header.frame_id = 'map'
-    goal_pose.header.stamp = action_client.get_clock().now().to_msg()
-    goal_pose.pose.position.x = float(sys.argv[1])
-    goal_pose.pose.position.y = float(sys.argv[2])
-    goal_pose.pose.orientation.w = float(sys.argv[3])   
+    try:
+        #dejamos abierto el servicio
+        rclpy.spin(action_client)
+    except KeyboardInterrupt:
+        action_client.get_logger().info('Cerrando el nodo service')
+    finally:
+        #destruimos el nodo
+        action_client.destroy_node()
+        #cerramos la comunicacion
+        rclpy.shutdown()
 
-    future = action_client.send_goal(goal_pose) # se para secs como argumento
+    
 
     rclpy.spin(action_client)
 

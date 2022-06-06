@@ -42,5 +42,6 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/MyMoveMsg.srv"
   "action/Move.action" #incluir
   "srv/DetectionMsg.srv" #incluir
+  "srv/NavToPoseMsg.srv" #incluir
 )
 ament_package()

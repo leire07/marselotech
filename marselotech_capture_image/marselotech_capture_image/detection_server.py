@@ -23,7 +23,7 @@ import datetime
 class Service(Node):
     def __init__(self):
         #constructor con el nombre del nodo
-        super().__init__('movement_server') 
+        super().__init__('detection_server') 
         # declara el objeto servicio pasando como parametros
         # tipo de mensaje
         # nombre del servicio
