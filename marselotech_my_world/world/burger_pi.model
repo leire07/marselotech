@@ -64,6 +64,10 @@
         <pose>-1.0 6.0 0.0 0.0 0.0 1.1</pose>
         <uri>model://shotgun</uri>
       </include>
+      <include>
+        <pose>-2.0 .0 0.0 0.0 0.0 1.1</pose>
+        <uri>model://military</uri>
+      </include>
       
       
     </model>
