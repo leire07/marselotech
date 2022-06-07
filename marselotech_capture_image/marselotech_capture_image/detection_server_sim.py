@@ -96,7 +96,7 @@ class Service(Node):
         try:
             # Seleccionamos bgr8 porque es la codificacion de OpenCV por defecto
             cv_image = self.bridge_object.imgmsg_to_cv2(data, desired_encoding="bgr8")
-            cv2.imwrite("/home/belen/image.jpg", cv_image)
+            cv2.imwrite("/home/john/image.jpg", cv_image)
             self.funciona=True
         except CvBridgeError as e:
             print(e)
@@ -112,7 +112,7 @@ class Service(Node):
 
         try:
             # Seleccionamos bgr8 porque es la codificacion de OpenCV por defecto
-            img=imread("/home/belen/image.jpg")
+            img=imread("/home/john/image.jpg")
             hsv = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)   
             self.funciona=True
         except CvBridgeError as e:
@@ -157,8 +157,8 @@ class Service(Node):
 
     def capturar_armas(self):
 
-        photo=imread("/home/belen/image.jpg")
-        imagesrc=open("/home/belen/image.jpg", 'rb')
+        photo=imread("/home/john/image.jpg")
+        imagesrc=open("/home/john/image.jpg", 'rb')
         client=boto3.client('rekognition','us-east-1')
 
         response = client.detect_labels(Image={'Bytes':imagesrc.read()})
@@ -166,7 +166,7 @@ class Service(Node):
         res=False
         #print('Detected labels for ' + photo) 
         for label in response['Labels']:
-            if(label['Name'] == 'Weapon' and (label['Confidence'])>= 90.00):
+            if(label['Name'] == 'Weapon' and (label['Confidence'])>= 50.00):
                 cv2.imwrite("armas.jpg",photo)
                 #Subir una imagen a Storage
                 storage = self.firebase.storage()
@@ -179,7 +179,7 @@ class Service(Node):
         return False
 
     def capturar_caras(self):
-        img=imread("/home/belen/image.jpg")
+        img=imread("/home/john/image.jpg")
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         face_cascade = cv2.CascadeClassifier('clasificadores/haarcascade_frontalface_default.xml')
@@ -283,43 +283,28 @@ class Service(Node):
         self.db.collection(u'images').add(data)
 
     def capturar_personas(self):
-        img=imread("/home/belen/image.jpg")
+        photo=imread("/home/john/image.jpg")
+        imagesrc=open("/home/john/image.jpg", 'rb')
+        client=boto3.client('rekognition','us-east-1')
 
-        img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        response = client.detect_labels(Image={'Bytes':imagesrc.read()})
 
-        people_cascade = cv2.CascadeClassifier('clasificadores/haarcascade_fullbody.xml')
-        people_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_fullbody.xml')
-
-        personas = people_cascade.detectMultiScale(img_gray, 1.1, 2)
-
-        npersonas = 0
-        for (x,y,w,h) in personas:
-            cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
-            roi_color = img[y:y+h, x:x+w]
-            npersonas=npersonas+1
-
-
-        if(npersonas>0):
-            cv2.imshow("PRUEBA", img)
-            
-            print("Intruso detectado!!!")
-
-
-            cv2.imwrite("persona.jpg",img) #la guarda
-            #Subir una imagen a Storage
-            storage = self.firebase.storage()
-            storage.child("persona").put("persona.jpg")     
-            
-            self.upload_image("persona.jpg", "persona")
-
-            return True
-
-
-        else:
-            print(npersonas)
-            return False
+        res=False
+        #print('Detected labels for ' + photo) 
+        for label in response['Labels']:
+            if(label['Name'] == 'Human' and (label['Confidence'])>= 70.00):
+                cv2.imwrite("armas.jpg",photo)
+                #Subir una imagen a Storage
+                storage = self.firebase.storage()
+                storage.child("arma").put("armas.jpg")
+                self.upload_image("armas.jpg", "arma");
+                res=True
         
-        cv2.waitKey(1)
+        if(res):
+            return True
+        return False
+        
+       
 
     def detectar_verde(self):    
     
@@ -331,26 +316,30 @@ class Service(Node):
 
         """
 
-        img=imread("/home/belen/image.jpg")
+        img=imread("/home/john/image.jpg")
 
                     
         hsv = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         #Detectar persona
+        photo=imread("/home/john/image.jpg")
+        imagesrc=open("/home/john/image.jpg", 'rb')
+        client=boto3.client('rekognition','us-east-1')
 
-        # Cargamos las librerías
-        people_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_fullbody.xml')
+        response = client.detect_labels(Image={'Bytes':imagesrc.read()})
 
-        # Detecta las personas de la imagen en escala de grises
-        personas = people_cascade.detectMultiScale(img_gray, 1.1, 2)
-
-        # Por cada persona detectada se dibuja un rectángulo a su al rededor
-        npersonas = 0
-        for (x,y,w,h) in personas:
-            #cv2.rectangle(cv_image,(x,y),(x+w,y+h),(255,0,0),2)
-            roi_color = img[y:y+h, x:x+w]
-            npersonas=npersonas+1
+        pers=False
+        #print('Detected labels for ' + photo) 
+        for label in response['Labels']:
+            if(label['Name'] == 'Human' and (label['Confidence'])>= 70.00):
+                cv2.imwrite("armas.jpg",photo)
+                #Subir una imagen a Storage
+                storage = self.firebase.storage()
+                storage.child("arma").put("armas.jpg")
+                self.upload_image("armas.jpg", "arma");
+                pers=True
+        
 
         #Termina detectar persona
 
@@ -399,8 +388,8 @@ class Service(Node):
 
         color = (0,0,255)
 
-        if(x1 != x2 or y1 != y2):
-            if(True):
+        if(x1 != 1000 or y1 != 0):
+            if(pers):
                 rectangulo = cv2.rectangle(img, (x1,y1), (x2,y2), color, 2)
 
                 cv2.imwrite("color.jpg",img) #la guarda
