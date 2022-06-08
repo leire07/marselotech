@@ -44,7 +44,7 @@ class Service(Node):
         try:
             # Seleccionamos bgr8 porque es la codificacion de OpenCV por defecto
             cv_image = self.bridge_object.imgmsg_to_cv2(data, desired_encoding="bgr8")
-            cv2.imwrite("/home/john/image.jpg", cv_image)
+            cv2.imwrite("/home/belen/image.jpg", cv_image)
             self.funciona=True
         except CvBridgeError as e:
             print(e)

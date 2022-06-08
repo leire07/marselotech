@@ -96,7 +96,7 @@ class Service(Node):
         try:
             # Seleccionamos bgr8 porque es la codificacion de OpenCV por defecto
             cv_image = self.bridge_object.imgmsg_to_cv2(data, desired_encoding="bgr8")
-            cv2.imwrite("/home/john/image.jpg", cv_image)
+            cv2.imwrite("/home/belen/image.jpg", cv_image)
             self.funciona=True
         except CvBridgeError as e:
             print(e)
@@ -112,7 +112,7 @@ class Service(Node):
 
         try:
             # Seleccionamos bgr8 porque es la codificacion de OpenCV por defecto
-            img=imread("/home/john/image.jpg")
+            img=imread("/home/belen/image.jpg")
             hsv = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)   
             self.funciona=True
         except CvBridgeError as e:
@@ -157,8 +157,8 @@ class Service(Node):
 
     def capturar_armas(self):
 
-        photo=imread("/home/john/image.jpg")
-        imagesrc=open("/home/john/image.jpg", 'rb')
+        photo=imread("/home/belen/image.jpg")
+        imagesrc=open("/home/belen/image.jpg", 'rb')
         client=boto3.client('rekognition','us-east-1')
 
         response = client.detect_labels(Image={'Bytes':imagesrc.read()})
@@ -179,7 +179,7 @@ class Service(Node):
         return False
 
     def capturar_caras(self):
-        img=imread("/home/john/image.jpg")
+        img=imread("/home/belen/image.jpg")
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         face_cascade = cv2.CascadeClassifier('clasificadores/haarcascade_frontalface_default.xml')
@@ -283,8 +283,8 @@ class Service(Node):
         self.db.collection(u'images').add(data)
 
     def capturar_personas(self):
-        photo=imread("/home/john/image.jpg")
-        imagesrc=open("/home/john/image.jpg", 'rb')
+        photo=imread("/home/belen/image.jpg")
+        imagesrc=open("/home/belen/image.jpg", 'rb')
         client=boto3.client('rekognition','us-east-1')
 
         response = client.detect_labels(Image={'Bytes':imagesrc.read()})
@@ -316,15 +316,15 @@ class Service(Node):
 
         """
 
-        img=imread("/home/john/image.jpg")
+        img=imread("/home/belen/image.jpg")
 
                     
         hsv = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         #Detectar persona
-        photo=imread("/home/john/image.jpg")
-        imagesrc=open("/home/john/image.jpg", 'rb')
+        photo=imread("/home/belen/image.jpg")
+        imagesrc=open("/home/belen/image.jpg", 'rb')
         client=boto3.client('rekognition','us-east-1')
 
         response = client.detect_labels(Image={'Bytes':imagesrc.read()})
@@ -333,11 +333,11 @@ class Service(Node):
         #print('Detected labels for ' + photo) 
         for label in response['Labels']:
             if(label['Name'] == 'Human' and (label['Confidence'])>= 70.00):
-                cv2.imwrite("armas.jpg",photo)
+                cv2.imwrite("persona.jpg",photo)
                 #Subir una imagen a Storage
                 storage = self.firebase.storage()
-                storage.child("arma").put("armas.jpg")
-                self.upload_image("armas.jpg", "arma");
+                storage.child("persona").put("persona.jpg")
+                self.upload_image("persona.jpg", "persona");
                 pers=True
         
 
